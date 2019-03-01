@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+        .time-wrapper {
+            width: 420px;
+            margin: 0 auto;
+        }
+
+        .date-header {
+            width: 100%;
+            display: flex;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .prev-month,
+        .next-month {
+            border: 15px solid transparent;
+            width: 0;
+            height: 0;
+        }
+
+        .prev-month {
+            border-right-color: rgb(0, 132, 255);
+        }
+
+        .next-month {
+            border-left-color: rgb(0, 132, 255);
+        }
+
+        .content {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .week-header {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .week-header>div {
+            flex: 1;
+            background: rgb(0, 132, 255);
+            color: white;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            font-weight: bolder;
+        }
+
+        .week-day {
+            width: 100%;
+        }
+
+        .every-day {
+            display: inline-block;
+            box-sizing: border-box;
+            padding: 3px;
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .every-day div {
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            box-sizing: border-box;
+            line-height: 54px;
+        }
+
+        .not-this-month {
+            color: rgb(172, 180, 176);
+        }
+
+        .week-day .today {
+            background: rgb(0, 132, 255);
+            border: 3px solid black;
+        }
+
+        .no:hover {
+            border: 3px solid rgb(0, 132, 255);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="time-wrapper">
+            <div class="date-header">
+                <div class="prev-month" @click="prevMonth"></div>
+                <div class="content">{{ year }}年{{ month }}月</div>
+                <div class="next-month" @click="nextMonth"></div>
+            </div>
+            <div class="date-content">
+                <div class="week-header">
+                    <div>日</div>
+                    <div>一</div>
+                    <div>二</div>
+                    <div>三</div>
+                    <div>四</div>
+                    <div>五</div>
+                    <div>六</div>
+                </div>
+                <div class="week-day">
+                    <div class="every-day" v-for="i in 42">
+                        <div v-if="i > beginDay && i-beginDay <= days" :class="i - beginDay === day && nowMonth === month && nowYear === year ? 'today' : 'no'">{{
+                            i - beginDay }}</div>
+                        <div v-if="i <= beginDay" @click="prevMonth" class="not-this-month">{{ prevDays - beginDay + i
+                            }}</div>
+                        <div v-if="i-beginDay > days" @click="nextMonth" class="not-this-month">{{ i - days - beginDay}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                year: null,
+                month: null,
+                day: null,
+                days: null,
+                nowMonth:null,
+                nowYear:null
+            },
+            methods: {
+                initTime() {
+                    this.nowYear = this.year = new Date().getFullYear();
+                    this.nowMonth = this.month = new Date().getMonth() + 1;
+                    this.day = new Date().getDate();
+                },
+                getDays(year = this.year, month = this.month) {
+                    if (month === 13) {
+                        month = 1;
+                        year++;
+                    }
+                    if (month === 0) {
+                        month = 12;
+                        year--;
+                    }
+                    if ([1, 3, 5, 7, 8, 10, 12].indexOf(month) !== -1) {
+                        return 31;
+                    } else if ([4, 6, 9, 11].indexOf(month) !== -1) {
+                        return 30;
+                    } else {
+                        if (year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0)) {
+                            return 29;
+                        } else {
+                            return 28;
+                        }
+                    }
+                },
+                prevMonth() {
+                    if (this.month === 1) {
+                        this.month = 12;
+                        this.year--;
+                    } else {
+                        this.month--;
+                    }
+                    this.days = this.getDays()
+                },
+                nextMonth() {
+                    if (this.month === 12) {
+                        this.month = 1;
+                        this.year++;
+                    } else {
+                        this.month++;
+                    }
+                    this.days = this.getDays()
+                }
+            },
+            created() {
+                this.initTime();
+                this.days = this.getDays();
+            },
+            computed: {
+                beginDay() {
+                    return new Date(this.year, this.month - 1, 1).getDay();
+                },
+                prevDays() {
+                    return this.getDays(this.year, this.month - 1)
+                },
+
+            }
+        })
+    </script>
+</body>
+
+</html>
